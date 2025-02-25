@@ -3,6 +3,7 @@ version: 3.8.0
 services:
   mysql:
     image: mysql:latest
+    container_name: mysql
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
@@ -20,6 +21,7 @@ services:
   
   postgres:
     image: postgres:latest
+    container_name: postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-user}
@@ -36,6 +38,7 @@ services:
   
   mongo:
     image: mongo:latest
+    container_name: mongo
     restart: unless-stopped
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-root}
@@ -49,6 +52,43 @@ services:
       - ./data/mongo:/data/db
     networks:
       - my-network
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    expose:
+      - "6379"
+    volumes:
+      - ./data/redis:/data
+    networks:
+      - my-network
+  
+  n8n:
+    image: n8nio/n8n:latest
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    expose:
+      - "5678"
+    volumes:
+      - ./data/n8n:/home/node/.n8n
+    networks:
+      - my-network
+    environment:
+      - GENERIC_TIMEZONE=Africa/Nairobi
+      - GENERIC_WEBHOOK_TOKENS=mySecretToken
+      # - DB_TYPE=postgresdb
+      # - DB_POSTGRESDB_HOST=postgres
+      # - DB_POSTGRESDB_PORT=5432
+      # - DB_POSTGRESDB_USER=${POSTGRES_USER:-user}
+      # - DB_POSTGRESDB_PASSWORD=${POSTGRES_PASSWORD:-password}
+      # - DB_POSTGRESDB_DATABASE=n8n
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+    depends_on:
+      - postgres
 
 networks:
   my-network:
