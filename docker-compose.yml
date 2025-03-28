@@ -1,5 +1,3 @@
-version: 3.8.0
-
 services:
   mysql:
     image: mysql:latest
@@ -89,7 +87,43 @@ services:
       - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
     depends_on:
       - postgres
+  invoiceshelf:
+    image: invoiceshelf/invoiceshelf:nightly
+    container_name: invoiceshelf
+    ports:
+      - 90:80
+    volumes:
+      - ./data/invoiceshelf/data:/data
+      - ./data/invoiceshelf/conf:/conf
+    networks:
+      - invoiceshelf
+    environment:
+      - PHP_TZ=UTC
+      - TIMEZONE=UTC
+      - APP_NAME=Laravel
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - APP_URL=http://localhost:90
+      - DB_CONNECTION=sqlite
+      - DB_DATABASE=/var/www/html/InvoiceShelf/database/database.sqlite # please don't touch this!
+      - CACHE_STORE=file
+      - SESSION_DRIVER=file
+      - SESSION_LIFETIME=120
+      - SESSION_ENCRYPT=false
+      - SESSION_PATH=/
+      - SESSION_DOMAIN=localhost
+      - SANCTUM_STATEFUL_DOMAINS=localhost:90
+      - STARTUP_DELAY=
+      #- MAIL_DRIVER=smtp
+      #- MAIL_HOST=smtp.mailtrap.io
+      #- MAIL_PORT=2525
+      #- MAIL_USERNAME=null
+      #- MAIL_PASSWORD=null
+      #- MAIL_PASSWORD_FILE=<filename>
+      #- MAIL_ENCRYPTION=null
+    restart: unless-stopped
 
 networks:
   my-network:
     driver: bridge
+  invoiceshelf:
